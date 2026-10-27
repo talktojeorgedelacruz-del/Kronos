@@ -1,0 +1,28 @@
+name: Fetch BTC data
+
+on:
+  push:
+    branches: [claude/project-thread-obh8pi]
+    paths: [.github/workflows/fetch-btc-data.yml, martingale/fetch_data.py]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install pandas requests
+      - run: python martingale/fetch_data.py
+      - name: Commit data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add martingale/data
+          git commit -m "Add BTCUSDT 5m data (3 years)" || echo "nothing to commit"
+          git push
