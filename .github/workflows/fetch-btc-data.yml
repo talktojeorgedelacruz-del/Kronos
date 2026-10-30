@@ -1,0 +1,28 @@
+name: Fetch BTC data for martingale backtest
+
+on:
+  push:
+    branches: [martingale-backtest]
+    paths: [martingale/fetch_data.py, .github/workflows/fetch-btc-data.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install pandas
+      - run: python martingale/fetch_data.py
+      - name: Commit data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898732+github-actions[bot]@users.noreply.github.com"
+          git add martingale/data/btcusdt_15m.csv
+          git commit -m "Update BTCUSDT 15m data" || echo "no changes"
+          git push
